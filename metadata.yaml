@@ -2,5 +2,5 @@ homepage: "https://www.cookiehandler.io"
 documentation: "https://www.cookiehandler.io/docs"
 versions:
   # latest version
-  - sha:  db7180b5722fe8e52dc7d67b5743581f1ee0c745
-    changeNotes: Initial Release for Cookie Handler Template
+  - sha:  a
+    changeNotes: Initial Commit with APACHE 2.0 License
