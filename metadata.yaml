@@ -2,5 +2,5 @@ homepage: "https://www.cookiehandler.io"
 documentation: "https://www.cookiehandler.io/docs"
 versions:
   # latest version
-  - sha:  a
+  - sha:  a707dd472d063e988dcaef49acfc9e77b9e1a26c
     changeNotes: Initial Commit with APACHE 2.0 License
