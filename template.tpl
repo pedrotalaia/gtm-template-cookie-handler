@@ -14,10 +14,6 @@ ___INFO___
   "version": 1,
   "securityGroups": [],
   "displayName": "Cookie Handler",
-  "categories": [
-    "TAG_MANAGEMENT",
-    "PERSONALIZATION"
-  ],
   "brand": {
     "id": "brand_dummy",
     "displayName": "",
@@ -260,7 +256,7 @@ consentFields.forEach(function(field) {
 setDefaultConsentState(defaultState);
 
 // Always check for consent cookie and update Consent Mode if found
-const consentCookie = getCookieValues('bb_cookie_consent', false)[0];
+const consentCookie = getCookieValues('cookie_consent', false)[0];
 if (
   consentCookie &&
   typeof consentCookie === 'string' &&
@@ -274,7 +270,7 @@ if (
   updateConsentState(state);
 
   // Push audit event to dataLayer for this update
-  let auditEvent = { event: 'bb_cmp_consent_update' };
+  let auditEvent = { event: 'ch_cmp_consent_update' };
   consentFields.forEach(function(field) {
     if (state[field] !== undefined) {
       auditEvent[field] = state[field];
@@ -286,9 +282,9 @@ if (
 
 // Only inject the banner and call GTM success/failure callbacks on default/init
 if (command === 'default') {
-  setInWindow('BB_DOMAIN_ID', domainId);
+  setInWindow('CH_DOMAIN_ID', domainId);
   injectScript(
-    'https://storage.googleapis.com/bb-cookie-handler-snippets/snippets/bb-cookie-banner-static.js',
+    'https://pub-8eee64d8edc143d294dbd39fbc310f74.r2.dev/cookie-banner-static.js',
     data.gtmOnSuccess,
     data.gtmOnFailure
   );
@@ -309,7 +305,7 @@ if (command === 'default') {
   updateConsentState(settingsObject);
 
   // Push audit event
-  let auditEvent = { event: 'bb_cmp_consent_' + command };
+  let auditEvent = { event: 'ch_cmp_consent_' + command };
   consentFields.forEach(function(field) {
     if (settingsObject[field] !== undefined) {
       auditEvent[field] = settingsObject[field];
@@ -421,7 +417,7 @@ ___WEB_PERMISSIONS___
                 "mapValue": [
                   {
                     "type": 1,
-                    "string": "BB_DOMAIN_ID"
+                    "string": "CH_DOMAIN_ID"
                   },
                   {
                     "type": 8,
@@ -730,7 +726,7 @@ ___WEB_PERMISSIONS___
             "listItem": [
               {
                 "type": 1,
-                "string": "https://storage.googleapis.com/bb-cookie-handler-snippets/*"
+                "string": "https://pub-8eee64d8edc143d294dbd39fbc310f74.r2.dev/*"
               }
             ]
           }
@@ -763,7 +759,7 @@ ___WEB_PERMISSIONS___
             "listItem": [
               {
                 "type": 1,
-                "string": "bb_cookie_consent"
+                "string": "ch_cookie_consent"
               }
             ]
           }
@@ -785,6 +781,6 @@ scenarios: []
 
 ___NOTES___
 
-Created on 25/07/2025, 22:00:56
+Created on 01/08/2025, 23:03:35
 
 
