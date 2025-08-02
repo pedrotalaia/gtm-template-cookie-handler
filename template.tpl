@@ -256,7 +256,7 @@ consentFields.forEach(function(field) {
 setDefaultConsentState(defaultState);
 
 // Always check for consent cookie and update Consent Mode if found
-const consentCookie = getCookieValues('cookie_consent', false)[0];
+const consentCookie = getCookieValues('ch_cookie_consent', false)[0];
 if (
   consentCookie &&
   typeof consentCookie === 'string' &&
@@ -280,9 +280,9 @@ if (
   log('CMP Consent Handler: Synced consent states from cookie:', state);
 }
 
+setInWindow('CH_DOMAIN_ID', domainId);
 // Only inject the banner and call GTM success/failure callbacks on default/init
 if (command === 'default') {
-  setInWindow('CH_DOMAIN_ID', domainId);
   injectScript(
     'https://pub-8eee64d8edc143d294dbd39fbc310f74.r2.dev/cookie-banner-static.js',
     data.gtmOnSuccess,
@@ -781,6 +781,6 @@ scenarios: []
 
 ___NOTES___
 
-Created on 01/08/2025, 23:03:35
+Created on 02/08/2025, 09:46:31
 
 

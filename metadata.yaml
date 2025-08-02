@@ -1,9 +1,12 @@
 homepage: "https://www.cookiehandler.io"
 documentation: "https://www.cookiehandler.io/docs"
 versions:
-  - version: 1.0.2 # CURRENT
+  - version: 1.0.3 # CURRENT
     
   # latest version
+  - version: 1.0.2
+    sha:  b9eefe316518007fdc344c4cc87b4501337aae1c
+    changeNotes: Updated CDN bucket and branding name for template variables
   - version: 1.0.1
     sha:  2d24054bb427035f571db71cd83613df5db5fda3
     changeNotes: metadata.yaml updated with the latest version with the clean version
