@@ -201,17 +201,10 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "CHECKBOX",
-    "name": "url_passthrough",
-    "checkboxText": "URL Passthrough",
+    "name": "setDefaultConsent",
+    "checkboxText": "Set Default Consent State",
     "simpleValueType": true,
-    "defaultValue": false
-  },
-  {
-    "type": "CHECKBOX",
-    "name": "ads_data_redaction",
-    "checkboxText": "Ads Data Redaction",
-    "simpleValueType": true,
-    "defaultValue": false
+    "defaultValue": true
   },
   {
     "type": "CHECKBOX",
@@ -219,6 +212,28 @@ ___TEMPLATE_PARAMETERS___
     "checkboxText": "Push DataLayer Event",
     "simpleValueType": true,
     "defaultValue": true
+  },
+  {
+    "type": "GROUP",
+    "name": "additional_options",
+    "displayName": "Additional Options",
+    "groupStyle": "NO_ZIPPY",
+    "subParams": [
+      {
+        "type": "CHECKBOX",
+        "name": "ads_data_redaction",
+        "checkboxText": "Ads Data Redaction",
+        "simpleValueType": true,
+        "defaultValue": false
+      },
+      {
+        "type": "CHECKBOX",
+        "name": "url_passthrough",
+        "checkboxText": "URL Passthrough",
+        "simpleValueType": true,
+        "defaultValue": false
+      }
+    ]
   }
 ]
 
@@ -247,16 +262,22 @@ const consentFields = [
 
 const domainId = data.id;
 const command = data.command || 'update';
+const setDefaultConsent = data.setDefaultConsent !== false;
+const consentCookie = getCookieValues('ch_cookie_consent', false)[0];
 
-// Always set default consent state
+
+// 1. Always set the default consent state at the start
 let defaultState = {};
 consentFields.forEach(function(field) {
   defaultState[field] = (field === 'functionality_storage') ? 'granted' : 'denied';
 });
-setDefaultConsentState(defaultState);
 
-// Always check for consent cookie and update Consent Mode if found
-const consentCookie = getCookieValues('ch_cookie_consent', false)[0];
+
+if(setDefaultConsent && !consentCookie){
+setDefaultConsentState(defaultState);
+}
+
+// 2. If the consent cookie exists, update Consent Mode with it
 if (
   consentCookie &&
   typeof consentCookie === 'string' &&
@@ -269,19 +290,13 @@ if (
   });
   updateConsentState(state);
 
-  // Push audit event to dataLayer for this update
-  let auditEvent = { event: 'ch_cmp_consent_update' };
-  consentFields.forEach(function(field) {
-    if (state[field] !== undefined) {
-      auditEvent[field] = state[field];
-    }
-  });
-  dataLayerPush(auditEvent);
   log('CMP Consent Handler: Synced consent states from cookie:', state);
 }
 
+// 3. Set the domain ID in the window object for the static banner
 setInWindow('CH_DOMAIN_ID', domainId);
-// Only inject the banner and call GTM success/failure callbacks on default/init
+
+// 4. Inject the static banner only if the command is "default"
 if (command === 'default') {
   injectScript(
     'https://pub-8eee64d8edc143d294dbd39fbc310f74.r2.dev/cookie-banner-static.js',
@@ -289,7 +304,7 @@ if (command === 'default') {
     data.gtmOnFailure
   );
 } else {
-  // User updated consent via banner—use passed data for update
+  // 5. On user update, update Consent Mode and push audit event
   let settingsObject = {};
   consentFields.forEach(function(field) {
     if (data[field] === 'granted' || data[field] === 'denied') {
@@ -303,17 +318,6 @@ if (command === 'default') {
   });
 
   updateConsentState(settingsObject);
-
-  // Push audit event
-  let auditEvent = { event: 'ch_cmp_consent_' + command };
-  consentFields.forEach(function(field) {
-    if (settingsObject[field] !== undefined) {
-      auditEvent[field] = settingsObject[field];
-    }
-  });
-  dataLayerPush(auditEvent);
-
-  log('CMP Consent Handler: Updated consent states with:', settingsObject);
 
   data.gtmOnSuccess();
 }
@@ -781,6 +785,6 @@ scenarios: []
 
 ___NOTES___
 
-Created on 02/08/2025, 09:46:31
+Created on 06/08/2025, 13:22:19
 
 
