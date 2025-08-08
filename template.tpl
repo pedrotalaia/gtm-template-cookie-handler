@@ -299,7 +299,7 @@ setInWindow('CH_DOMAIN_ID', domainId);
 // 4. Inject the static banner only if the command is "default"
 if (command === 'default') {
   injectScript(
-    'https://pub-8eee64d8edc143d294dbd39fbc310f74.r2.dev/cookie-banner-static.js',
+    'https://cookiehandler.io/cookie-banner-static.js',
     data.gtmOnSuccess,
     data.gtmOnFailure
   );
@@ -730,7 +730,7 @@ ___WEB_PERMISSIONS___
             "listItem": [
               {
                 "type": 1,
-                "string": "https://pub-8eee64d8edc143d294dbd39fbc310f74.r2.dev/*"
+                "string": "https://cookiehandler.io/*"
               }
             ]
           }
