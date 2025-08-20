@@ -240,16 +240,13 @@ ___TEMPLATE_PARAMETERS___
 
 ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 
-const dataLayerPush = require('createQueue')('dataLayer');
-const setDefaultConsentState = require('setDefaultConsentState');
-const updateConsentState = require('updateConsentState');
-const gtagSet = require('gtagSet');
-const log = require('logToConsole');
-const injectScript = require('injectScript');
-const setInWindow = require('setInWindow');
-const getCookieValues = require('getCookieValues');
-const JSON = require('JSON');
-const decodeUriComponent = require('decodeUriComponent');
+const dataLayerPush           = require('createQueue')('dataLayer');
+const setDefaultConsentState  = require('setDefaultConsentState');
+const updateConsentState      = require('updateConsentState');
+const gtagSet                 = require('gtagSet');
+const log                     = require('logToConsole');
+const injectScript            = require('injectScript');
+const setInWindow             = require('setInWindow');
 
 const consentFields = [
   'ad_storage',
@@ -260,65 +257,58 @@ const consentFields = [
   'ad_personalization'
 ];
 
-const domainId = data.id;
-const command = data.command || 'update';
-const setDefaultConsent = data.setDefaultConsent !== false;
-const consentCookie = getCookieValues('ch_cookie_consent', false)[0];
 
+const domainId        = data.id || data.domainId;
+const command         = data.command || 'update';
+const setDefault      = data.setDefaultConsent !== false;
+const ccpaEnabled     = !!data.ccpaEnabled;
+const bannerUrl       = data.bannerUrl || 'https://cookiehandler.io/cookie-banner-static.js';
 
-// 1. Always set the default consent state at the start
-let defaultState = {};
-consentFields.forEach(function(field) {
-  defaultState[field] = (field === 'functionality_storage') ? 'granted' : 'denied';
-});
-
-
-if(setDefaultConsent && !consentCookie){
-setDefaultConsentState(defaultState);
-}
-
-// 2. If the consent cookie exists, update Consent Mode with it
-if (
-  consentCookie &&
-  typeof consentCookie === 'string' &&
-  decodeUriComponent(consentCookie).charAt(0) === '{'
-) {
-  const parsed = JSON.parse(decodeUriComponent(consentCookie));
-  let state = {};
+// Default set 'denied'
+if (setDefault) {
+  const defaultState = {};
   consentFields.forEach(function(field) {
-    if (parsed[field]) state[field] = parsed[field];
+    defaultState[field] = (field === 'functionality_storage') ? 'granted' : 'denied';
   });
-  updateConsentState(state);
-
-  log('CMP Consent Handler: Synced consent states from cookie:', state);
+  setDefaultConsentState(defaultState);
+  log('Cookie Handler GTM: setDefaultConsentState →', defaultState);
 }
 
-// 3. Set the domain ID in the window object for the static banner
-setInWindow('CH_DOMAIN_ID', domainId);
+// CCPA Flags
+if (ccpaEnabled) {
+  const adsDataRedaction = (typeof data.ads_data_redaction === 'boolean') ? data.ads_data_redaction : true;
+  const urlPassthrough   = (typeof data.url_passthrough === 'boolean')   ? data.url_passthrough   : false;
 
-// 4. Inject the static banner only if the command is "default"
+  gtagSet({
+    ads_data_redaction: adsDataRedaction,
+    url_passthrough: urlPassthrough
+  });
+  log('Cookie Handler GTM: gtagSet →', { ads_data_redaction: adsDataRedaction, url_passthrough: urlPassthrough });
+}
+
+if (domainId) {
+  setInWindow('CH_DOMAIN_ID', domainId);
+} else {
+  log('Cookie Handler GTM: No domainId provided');
+}
+
+// Apply the Banner
 if (command === 'default') {
   injectScript(
-    'https://cookiehandler.io/cookie-banner-static.js',
+    bannerUrl,
     data.gtmOnSuccess,
     data.gtmOnFailure
   );
 } else {
-  // 5. On user update, update Consent Mode and push audit event
-  let settingsObject = {};
+  const settingsObject = {};
   consentFields.forEach(function(field) {
     if (data[field] === 'granted' || data[field] === 'denied') {
       settingsObject[field] = data[field];
     }
   });
 
-  gtagSet({
-    url_passthrough: data.url_passthrough || false,
-    ads_data_redaction: data.ads_data_redaction || false
-  });
-
   updateConsentState(settingsObject);
-
+  log('Cookie Handler GTM: updateConsentState →', settingsObject);
   data.gtmOnSuccess();
 }
 
@@ -731,39 +721,6 @@ ___WEB_PERMISSIONS___
               {
                 "type": 1,
                 "string": "https://cookiehandler.io/*"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    "clientAnnotations": {
-      "isEditedByUser": true
-    },
-    "isRequired": true
-  },
-  {
-    "instance": {
-      "key": {
-        "publicId": "get_cookies",
-        "versionId": "1"
-      },
-      "param": [
-        {
-          "key": "cookieAccess",
-          "value": {
-            "type": 1,
-            "string": "specific"
-          }
-        },
-        {
-          "key": "cookieNames",
-          "value": {
-            "type": 2,
-            "listItem": [
-              {
-                "type": 1,
-                "string": "ch_cookie_consent"
               }
             ]
           }

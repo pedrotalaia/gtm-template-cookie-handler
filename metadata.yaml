@@ -2,6 +2,8 @@ homepage: "https://www.cookiehandler.io"
 documentation: "https://www.cookiehandler.io/docs"
 versions:
   # latest version
+  - sha: 83660578c1c70814332c75fe0bf0023c6c318c6e
+    changeNotes: Changed the static banner url
   - sha: 11e12a6b23e80131dce74cf73a4d39334728e328
     changeNotes: Allow users to select if they want the banner to push the default consent state
   - sha: a03f4e714bdf7f75d89a5f0c38c8774e94d26741
